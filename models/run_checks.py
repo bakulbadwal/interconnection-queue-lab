@@ -6,7 +6,7 @@ import json, os, sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from stats import (load, select, shares, durations, aalen_johansen, kaplan_meier_cod, at, naive_by,
-                   landmark, quantile, built_waits, at_risk)
+                   landmark, quantile, built_waits, at_risk, follow_up)
 from econ import load_options, delay_cost, option_view, portfolio
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -66,7 +66,12 @@ def main():
 
     camp = O["campus"]
     V, r = camp["valuePerMWyr"], camp["discount"]
-    measured = {"waits": built["pjm-gas-big"], "p": at(steps_by["pjm-gas-big"], 10, 2)}
+    q_opt = next(o for o in O["options"] if o["id"] == "queue")
+    q_h = min(q_opt["pHorizon"], follow_up(dur_by["pjm-gas-big"]))
+    measured = {"waits": built["pjm-gas-big"], "p": at(steps_by["pjm-gas-big"], q_h, 2)}
+    out["queue:horizon"] = q_h
+    for name, dur in dur_by.items():
+        out[f"followup:{name}"] = follow_up(dur)
     views = {o["id"]: option_view(o, camp, V, r, measured, quantile) for o in O["options"]}
     for k, v in views.items():
         for kk in ["p", "p10", "p50", "p90", "onByDeadline", "costPerMW"]:

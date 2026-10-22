@@ -12,6 +12,7 @@ import { dirname, join } from "node:path";
 import * as S from "../js/stats.js";
 import * as E from "../js/econ.js";
 import { computeNumbers } from "../js/numbers.js";
+import { FIELD_SLICE } from "../js/steps/test.js";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..");
 const read = p => JSON.parse(readFileSync(join(ROOT, p), "utf8"));
@@ -58,7 +59,11 @@ for (const spec of B.built) {
 }
 B.delay.forEach((c, i) => { js[`delay:${i}`] = E.delayCost(c.T, c.T0, c.mw, c.V, c.r); });
 const camp = O.campus, V = camp.valuePerMWyr, r = camp.discount;
-const measured = { waits: built["pjm-gas-big"], p: S.at(stepsBy["pjm-gas-big"], 10, 2) };
+const qOpt = O.options.find(o => o.id === "queue");
+const qH = Math.min(qOpt.pHorizon, S.followUp(durBy["pjm-gas-big"]));
+const measured = { waits: built["pjm-gas-big"], p: S.at(stepsBy["pjm-gas-big"], qH, 2) };
+js["queue:horizon"] = qH;
+for (const [name, dur] of Object.entries(durBy)) js[`followup:${name}`] = S.followUp(dur);
 const views = Object.fromEntries(O.options.map(o => [o.id, E.optionView(o, camp, V, r, measured, S.quantile)]));
 for (const [k, v] of Object.entries(views)) for (const kk of ["p", "p10", "p50", "p90", "onByDeadline", "costPerMW"]) js[`option:${k}:${kk}`] = v[kk];
 for (const pf of B.portfolios) {
@@ -105,6 +110,13 @@ for (const spec of B.slices.filter(s => s.timing)) {
 }
 for (const L of B.landmark.L) ok(near(js[`landmark:${L}:cod`] + js[`landmark:${L}:wd`] + js[`landmark:${L}:wait`], 1, 1e-12), `landmark ${L}: shares sum to 1`);
 ok(near(js["landmark:0:cod"], (js["slice:timing-all:aj:cod:3"] - S.at(stepsBy["timing-all"], 0, 2)) / js["landmark:0:S_L"]), "landmark at 0 = AJ at h (after same-day events)");
+
+// Follow-up guards: the default step-1 slice and the field test's slice must be watched for 10 years.
+{
+  const fs = sl({ ...FIELD_SLICE, timing: true });
+  ok(S.followUp(S.durations(fs, C)) >= 10, `field-test slice watched ≥ 10 years (got ${S.followUp(S.durations(fs, C))})`);
+  ok(js["followup:pjm-2010-2020"] >= 10, `default step-1 slice (PJM 2010–2020) watched ≥ 10 years (got ${js["followup:pjm-2010-2020"]})`);
+}
 
 // ── 3. LBNL headline (Queued Up 2026: 13% of 2000–2020 capacity and 19% of projects reached COD; 75% of capacity withdrawn)
 ok(Math.round(100 * js["slice:all-2000-2020:mw:share1"]) === 13, `LBNL: 13% of capacity operational (got ${(100 * js["slice:all-2000-2020:mw:share1"]).toFixed(2)}%)`);

@@ -24,9 +24,11 @@ export function context({ D, O, rows }) {
   });
   const queueOpt = O.options.find(o => o.id === "queue");
   const qRows = sel({ ...queueOpt.slice, timing: true });
-  const qSteps = S.aalenJohansen(S.durations(qRows, C));
+  const qDur = S.durations(qRows, C), qSteps = S.aalenJohansen(qDur);
   const qWaits = S.builtWaits(sel(queueOpt.slice), [queueOpt.slice.years[0], 2025]);
-  const measured = { waits: qWaits, p: S.at(qSteps, queueOpt.pHorizon, 2), n: qRows.length };
+  // Odds at the horizon, or at the end of follow-up if the slice hasn't been watched that long.
+  const qH = Math.min(queueOpt.pHorizon, S.followUp(qDur));
+  const measured = { waits: qWaits, p: S.at(qSteps, qH, 2), n: qRows.length, horizon: qH };
   return { R, T, C, sel, measured };
 }
 
@@ -51,8 +53,8 @@ export function computeNumbers({ D, O, rows }) {
   N.c2020GW = fmt.int(cm.total / 1000) + " GW";
   N.c2020opGW = fmt.int(cm.w[1] / 1000) + " GW";
 
-  // Step 1 — odds (default slice: PJM, all types, timing sample)
-  const pjm = sel({ regions: ["PJM"], timing: true });
+  // Step 1 — odds (default slice: PJM, all types, entered 2010–2020; 2021–2025 entrants have too little follow-up to pool)
+  const pjm = sel({ regions: ["PJM"], years: [2010, 2020], timing: true });
   const pdur = S.durations(pjm, C), paj = S.aalenJohansen(pdur), pkm = S.kaplanMeierCod(pdur);
   N.pjmN = fmt.int(pjm.length);
   N.pjmAj5 = fmt.pct(S.at(paj, 5, 2)); N.pjmAj10 = fmt.pct(S.at(paj, 10, 2));
@@ -62,7 +64,7 @@ export function computeNumbers({ D, O, rows }) {
 
   // Step 2 — the wait
   const four = ["CAISO", "MISO", "PJM", "SPP"];
-  const w1519 = S.builtWaits(sel({ regions: four }), [2015, 2019]), w2125 = S.builtWaits(sel({ regions: four }), [2021, 2025]);
+  const w1519 = S.builtWaits(sel({ timing: true }), [2015, 2019]), w2125 = S.builtWaits(sel({ timing: true }), [2021, 2025]);
   N.b1519n = fmt.int(w1519.length); N.b1519p50 = fmt.yr(S.quantile(w1519, 0.5)); N.b1519p90 = fmt.yr(S.quantile(w1519, 0.9));
   N.b2125n = fmt.int(w2125.length); N.b2125p50 = fmt.yr(S.quantile(w2125, 0.5)); N.b2125p90 = fmt.yr(S.quantile(w2125, 0.9));
   const w25 = S.builtWaits(rows, [2025, 2025]);
@@ -85,7 +87,7 @@ export function computeNumbers({ D, O, rows }) {
   const qs = E.empiricalSummary(measured.waits, camp.readyYears, camp.mw, V, r, S.quantile);
   N.qN = fmt.int(qs.n); N.qMean = fmt.money(qs.mean); N.qP50 = fmt.money(qs.p50); N.qP90 = fmt.money(qs.p90); N.qLate = fmt.pct(qs.late);
   N.qWaitP50 = fmt.yr(S.quantile(measured.waits, 0.5)); N.qWaitP90 = fmt.yr(S.quantile(measured.waits, 0.9));
-  N.qOdds = fmt.pct(measured.p); N.qReqN = fmt.int(measured.n);
+  N.qOdds = fmt.pct(measured.p); N.qReqN = fmt.int(measured.n); N.qHorizon = fmt.yr(measured.horizon);
 
   // Step 4 + capstone — the options
   const vw = views(O, measured, V, r);
@@ -95,10 +97,11 @@ export function computeNumbers({ D, O, rows }) {
   }
   const best = Object.values(vw).sort((a, b) => b.p * b.onByDeadline - a.p * a.onByDeadline)[0];
   N.bestOnTimeId = best.id;
-  for (const [name, alloc] of Object.entries({ allQueue: { queue: 250 }, mixed: { uprate: 100, btm: 100, flex: 50 } })) {
+  for (const [name, alloc] of Object.entries({ allQueue: { queue: 250 }, mixed: { uprate: 100, btm: 100, flex: 50 }, allBtm: { btm: 250 } })) {
     const pf = E.portfolio(vw, alloc, camp.needMW, camp.fallbackYears, camp, V, r);
     N[`${name}PNeed`] = fmt.pct(pf.pNeed); N[`${name}Cost`] = fmt.money(pf.cost); N[`${name}ExpMW`] = fmt.mw(pf.expectedMW);
   }
+  N.allBtmEven = fmt.pct(0.5 * vw.btm.onByDeadline);
   N.needMW = fmt.mw(camp.needMW);
   return N;
 }

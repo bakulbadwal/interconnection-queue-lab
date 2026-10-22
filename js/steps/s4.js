@@ -31,7 +31,7 @@ export async function render(root, lab) {
       q: "Which path is most likely to have power flowing by the end of 2029?",
       options: names.map(o => o.short),
       answer: names.findIndex(o => o.id === N.bestOnTimeId),
-      explain: () => `${O.options.find(o => o.id === N.bestOnTimeId).short}, at ${N[N.bestOnTimeId + "OnTime"]} with the default assumptions. It skips the generator queue entirely. A new build in the PJM queue has ${N.queueOnTime}: only ${N.qOdds} of big gas requests reach COD within 10 years, and few of those that do get there by year three. The uprate's odds are high, but its timeline straddles the deadline (${N.uprateOnTime}).`,
+      explain: () => `${O.options.find(o => o.id === N.bestOnTimeId).short}, at ${N[N.bestOnTimeId + "OnTime"]} with the default assumptions. It skips the generator queue entirely. A new build in the PJM queue has ${N.queueOnTime}: only ${N.qOdds} of big gas requests reach COD within ${N.qHorizon} (as far as they've been watched), and few of those that do get there by year three. The uprate's odds are high, but its timeline straddles the deadline (${N.uprateOnTime}).`,
     }));
 
   const rowsEl = h("div", { class: "optrows" });
@@ -54,7 +54,7 @@ export async function render(root, lab) {
       h("details", {},
         h("summary", {}, "Where these numbers come from"),
         h("p", { style: { margin: "6px 0" } }, o.anchor),
-        o.time === "measured" ? h("p", { class: "small" }, `Measured from ${fmt.int(v.n)} built plants. Odds = Aalen–Johansen probability of COD within ${o.pHorizon} years, over ${N.qReqN} requests (step 1).`)
+        o.time === "measured" ? h("p", { class: "small" }, `Measured from ${fmt.int(v.n)} built plants. Odds = Aalen–Johansen probability of COD within ${N.qHorizon}, the end of follow-up for these ${N.qReqN} requests (step 1).`)
           : slider({ label: "Your view of the odds it succeeds", min: 0.05, max: 1, step: 0.05, value: ps[o.id], fmt: x => fmt.pct(x), id: `s4p-${o.id}`, oninput: x => { ps[o.id] = x; draw(); } }),
         h("div", { class: "cite" }, o.src.map(([t, u], i) => [i ? " · " : "Sources: ", h("a", { href: u, target: "_blank", rel: "noopener" }, t)]))));
   }));
@@ -71,14 +71,14 @@ export async function render(root, lab) {
 
   root.append(
     clicks(null, h("ul", {},
-      h("li", { html: `<b>The scarce asset is the grid connection, not the generator.</b> Uprates and restarts start from a connection that already exists, though added megawatts may still need PJM to raise the plant's interconnection rights. Even Crane's restart ran into the queue: PJM said some upgrades would take until 2031, so Constellation asked FERC to move another plant's injection rights to it.` }),
+      h("li", { html: `<b>The scarce asset is the grid connection, not the generator.</b> A plant's interconnection (or injection) rights are its permission to push a set number of megawatts onto the grid. Uprates and restarts start from rights that already exist, though added megawatts may still need PJM to raise them. Even Crane's restart ran into the queue: PJM said some upgrades would take until 2031, so Constellation asked FERC to move another plant's injection rights to it.` }),
       h("li", { html: `<b>Fast tracks still need hardware.</b> PJM's expedited track promises an agreement in about 10 months for projects that can be online within three years. But a heavy-frame gas turbine ordered today delivers in 2031. The fast lane only helps if you already hold the turbine.` }),
       h("li", { html: `<b>Behind-the-meter and flexible load trade money and risk for time.</b> On-site aeroderivative turbines cost about twice what a combined-cycle turbine costs per kW. Accepting curtailment (about 85 hours a year in Duke's 0.25% case) buys earlier access where the grid has headroom. Both skip the generator queue, and both carry risks the queue doesn't: fuel and air permits, or rules that are still being written.` }),
       h("li", { html: "<b>Your odds are a dial, not a fact.</b> Open any modeled row and move its odds. Odds for options with no public track record are teaching values. Argue with them." }))),
-    say("The scarce thing is the interconnection right, not the turbine. Uprates and restarts reuse one, behind-the-meter skips the line, and a new build in the queue is the slowest, least likely path to power by 2029."),
+    say(`The scarce thing is the interconnection right, not the turbine. Uprates and restarts reuse one, behind-the-meter skips the line, and a new build in the queue is the slowest path, with about a ${N.queueOnTime} chance of power by 2029.`),
     modelCard({
       what: "For each path to power: the P10/median/P90 years from today, the chance it succeeds, and the chance it delivers by end-2029.",
-      formula: "Queue: the measured waits of built PJM gas plants of 100 MW or more (empirical quantiles), with odds = Aalen–Johansen CIF<sub>COD</sub>(10 years). Other paths: a triangular distribution (low, most likely, high) anchored on cited dates, with teaching-value odds. On time = odds × P(time ≤ end-2029). Expected delay cost per MW integrates step 3's cost curve over the range (4,000-point midpoint rule).",
+      formula: `Queue: the measured waits of built PJM gas plants of 100 MW or more (empirical quantiles), with odds = Aalen–Johansen CIF<sub>COD</sub> at 10 years or at the end of follow-up, whichever comes first (here ${N.qHorizon}). Other paths: a triangular distribution (low, most likely, high) anchored on cited dates, with teaching-value odds. On time = odds × P(time ≤ end-2029). Expected delay cost per MW integrates step 3's cost curve over the range (4,000-point midpoint rule).`,
       tags: `<span class="tag tag-M">measured</span> the queue row. <span class="tag tag-S">sourced</span> the anchor dates and facts in each row's notes. <span class="tag tag-T">teaching value</span> every other row's odds and most-likely time. Dollar figures from the sources (uprate $4.3B for 890 MW; aeroderivative ≈$1,800 per kW vs ≈$950 for combined-cycle turbines) aren't comparable cost bases, so the desk doesn't rank options on them.`,
       py: "econ.py",
     }));

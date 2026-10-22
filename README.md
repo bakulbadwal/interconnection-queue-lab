@@ -14,12 +14,12 @@ The news hook: on Oct 6, 2026, Google signed a 20-year deal for 890 MW of **upra
 
 | Step | You play with | What clicks |
 |---|---|---|
-| **0 · The line** | Every request since 2000, by region and outcome, by MW or by count | Of capacity that asked to connect 2000–2020, **13%** was running by end-2025 and **75%** was withdrawn (LBNL's headline, reproduced). These are *generator* queues; a data center's own load request is a separate line |
-| **1 · Odds of reaching the finish** ★ | Region × technology × size × entry years; three ways to count | The naive share understates (unfinished ≠ failed). Kaplan–Meier that ignores withdrawals overstates wildly (withdrawn can't finish). For PJM requests since 2010: naive **11%**, KM **69%**, competing risks (Aalen–Johansen) **18%** within 10 years |
-| **2 · How long the wait is** | Request→COD distribution for built projects; "already waited N years" landmark odds | In CAISO, MISO, PJM and SPP, the median wait rose from **3.6** years (built 2015–2019) to **5.7** (2021–2025), and the P90 from 7.5 to **8.9**. Survivors' odds rise (3-year COD odds **3%** at entry → **26%** at six years), but most are still waiting |
+| **0 · The line** | Every request since 1995 (the chart starts at 2000), by region and outcome, by MW or by count | Of capacity that asked to connect 2000–2020, **13%** was running by end-2025 and **75%** was withdrawn (LBNL's headline, reproduced). These are *generator* queues; a data center's own load request is a separate line |
+| **1 · Odds of reaching the finish** ★ | Region × technology × size × entry years; three ways to count | The naive share understates (unfinished ≠ failed). Kaplan–Meier that ignores withdrawals overstates wildly (withdrawn can't finish). For PJM requests that entered 2010–2020: naive **16%**, KM **70%**, competing risks (Aalen–Johansen) **21%** within 10 years. Readouts stop where a slice's follow-up ends: odds beyond it are unknown, not zero |
+| **2 · How long the wait is** | Request→COD distribution for built projects; "already waited N years" landmark odds | Among 2010-and-later entrants in CAISO, MISO, PJM and SPP, the median wait rose from **3.2** years (built 2015–2019) to **5.7** (2021–2025), and the P90 from 6.1 to **8.6**. Survivors' odds rise (3-year COD odds **3%** at entry → **26%** at six years), but most are still waiting |
 | **3 · What a year costs** | A 250 MW campus, Compute Deal Desk's price of a megawatt-year, discounting, an "idle GPUs" toggle, the measured waits of big PJM gas plants | One year late ≈ **$613M** at teaching prices, **$1.49B** if the GPUs are already bought. The null case (power on the ready date) is $0 |
 | **4 · The options desk** | Queue a new build (measured), PJM's expedited track, an uprate (Google–Constellation), a restart (Crane), behind-the-meter gas, flexible load | The scarce asset is the **interconnection right**, not the generator. Even Crane's restart ran into PJM upgrades until 2031 |
-| **★ The power memo** | Split 250 MW across paths; exact odds of ≥200 MW by end-2029; a six-sentence memo drafted from your plan | All in the queue: **2%**. A reference mix (uprate + behind-the-meter gas + flexible load): **26%** |
+| **★ The power memo** | Split 250 MW across paths; exact odds of ≥200 MW by end-2029; a six-sentence memo drafted from your plan | All in the queue: **2%**. A reference mix (uprate + behind-the-meter gas + flexible load): **26%**. All behind-the-meter gas: **83%** under the default odds, and the step asks what would stop you |
 | **✓ Field test** | Eight questions answered by operating the widgets | Proof it stuck |
 
 Each step has a predict-then-reveal question, a "say it out loud" line, a model card (the estimator, what's measured vs modeled, the Python twin), and a running, printable list of **takeaways**.
@@ -43,10 +43,10 @@ Each step has a predict-then-reveal question, a "say it out loud" line, a model 
 
 ## Checks
 
-`make check` is the acceptance gate (916 checks plus 270 cross-checks at the last run):
+`make check` is the acceptance gate (982 checks plus 288 cross-checks at the last run):
 
-- every estimator in `js/stats.js` and `js/econ.js` is re-implemented in pure-stdlib Python ([`models/`](models/)), and 736 values must agree to 1e-9;
-- the survival estimators are cross-checked against **statsmodels** (`CumIncidenceRight`, `SurvfuncRight`), an implementation this repo didn't write: 270 values to 1e-9;
+- every estimator in `js/stats.js` and `js/econ.js` is re-implemented in pure-stdlib Python ([`models/`](models/)), and 791 values must agree to 1e-9;
+- the survival estimators are cross-checked against **statsmodels** (`CumIncidenceRight`, `SurvfuncRight`), an implementation this repo didn't write: 288 values to 1e-9;
 - null cases and identities: no delay ⇒ $0; S + CIF<sub>COD</sub> + CIF<sub>withdrawn</sub> = 1; KM = Aalen–Johansen with no competing events; Aalen–Johansen = the naive share with no censoring; a certain, on-time portfolio ⇒ P = 1;
 - LBNL's published headline (13% / 75% / 19%) is reproduced from the snapshot;
 - every number the copy quotes is computed in [`js/numbers.js`](js/numbers.js) and written to [`tests/numbers.json`](tests/numbers.json). The check fails if a step file hard-codes a percentage or dollar figure that isn't traced there or to the cited-sources list.

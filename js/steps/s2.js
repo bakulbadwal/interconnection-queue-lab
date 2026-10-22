@@ -19,17 +19,18 @@ export async function render(root, lab) {
   root.append(h("div", { class: "card" },
     h("div", { class: "card-h" }, h("h3", {}, "Request to commercial operation, for projects that got built"), tag("M")),
     h("div", { class: "ctrlrow" },
-      pick("Regions", [["four", "CAISO, MISO, PJM, SPP"], ["all", "All nine regions (dated rows)"]], st.set, v => { st.set = v; drawA(); }),
+      pick("Regions", [["four", "CAISO, MISO, PJM, SPP (entered 2010+)"], ["all", "All nine regions (any dated COD)"]], st.set, v => { st.set = v; drawA(); }),
       pick("When built", ERAS.map(([v, t]) => [v, t]), st.era, v => { st.era = v; drawA(); }),
       pick("Technology", [["all", "Any technology"], ...D.types.map((t, i) => [String(i), t])], st.type, v => { st.type = v; drawA(); })),
     chartBox,
     legend([[css("--blue"), "Built projects, by years waited"], [css("--brass"), "Median", "line"], [css("--wall"), "P90", "line"]]),
     h("div", { class: "readouts" }, ro.n, ro.p10, ro.p50, ro.p90),
-    h("p", { class: "note", html: `<b>Two ways to count the same year.</b> LBNL's report gives a ${N.lbnlMo} median for projects online in 2025, across ${N.lbnlN} rows with a 2025 online date. ${N.lbnlNotOp} of those rows aren't marked operational, ${N.lbnlSppWd} of them SPP requests marked withdrawn. Counting only operational projects, across all nine regions, the median is ${N.b25allMo} (${N.b25allN} projects). Both are honest. They answer slightly different questions.` })));
+    h("p", { class: "note", html: `<b>Two ways to count the same year.</b> LBNL's report gives a median of ${N.lbnlMo} for projects online in 2025, across ${N.lbnlN} rows with a 2025 online date. ${N.lbnlNotOp} of those rows aren't marked operational, ${N.lbnlSppWd} of them SPP requests marked withdrawn. Counting only operational projects, across all nine regions, the median is ${N.b25allMo} (${N.b25allN} projects). Both are honest. They answer slightly different questions.` })));
 
   function drawA() {
     const era = ERAS.find(e => e[0] === st.era)[2];
-    const rr = cx.sel({ regions: st.set === "four" ? D.timingRegions : null, types: st.type === "all" ? null : [D.types[+st.type]] });
+    // "four" is the timing sample (entered 2010–2025); "all" is every dated COD in all nine regions, any entry year.
+    const rr = cx.sel({ timing: st.set === "four", types: st.type === "all" ? null : [D.types[+st.type]] });
     const w = builtWaits(rr, era);
     const W = 640, H = 260, m = { l: 40, r: 14, t: 12, b: 40 }, tMax = 14, bin = 0.5;
     const bins = new Array(Math.ceil(tMax / bin)).fill(0);
@@ -50,7 +51,7 @@ export async function render(root, lab) {
     ro.n.set(fmt.int(w.length), w.length < 40 ? "thin: read the shape, not the decimals" : "");
     ro.p10.set(w.length ? fmt.yr(quantile(w, 0.1)) : "–"); ro.p50.set(w.length ? fmt.yr(quantile(w, 0.5)) : "–"); ro.p90.set(w.length ? fmt.yr(quantile(w, 0.9)) : "–");
     if (st.era !== "2021-2025" || st.set !== "four" || st.type !== "all") {
-      ledger.put("s2a", { what: "Request→COD for projects built 2021–2025 (CAISO, MISO, PJM, SPP)", price: `median ${N.b2125p50}, P90 ${N.b2125p90}`, note: `${N.b2125n} projects. Built 2015–2019: median ${N.b1519p50}, P90 ${N.b1519p90}.` });
+      ledger.put("s2a", { what: "Request→COD for projects built 2021–2025 (CAISO, MISO, PJM, SPP; entered 2010+)", price: `median ${N.b2125p50}, P90 ${N.b2125p90}`, note: `${N.b2125n} projects. Built 2015–2019: median ${N.b1519p50}, P90 ${N.b1519p90}.` });
     }
   }
   drawA();
@@ -93,14 +94,15 @@ export async function render(root, lab) {
     for (let L = 0; L <= 10; L++) { const v = landmark(taj, L, 3).cod; d += `${L ? "L" : "M"}${x(L)},${y(v)}`; }
     c.append(s("path", { d, fill: "none", stroke: css("--op"), "stroke-width": 2.4 }), s("circle", { cx: x(st.L), cy: y(lm.cod), r: 5, fill: css("--op") }));
     curve.replaceChildren(c);
-    roB.cod.set(fmt.pct(lm.cod)); roB.wd.set(fmt.pct(lm.wd)); roB.wait.set(fmt.pct(lm.wait)); roB.n.set(fmt.int(n), n < 300 ? "thinning: fewer old requests" : "");
+    roB.cod.set(fmt.pct(lm.cod)); roB.wd.set(fmt.pct(lm.wd)); roB.wait.set(fmt.pct(lm.wait)); const n3 = atRisk(tdur, st.L + 3);
+    roB.n.set(fmt.int(n), n3 < 100 ? `thin: only ${fmt.int(n3)} watched to year ${st.L + 3}` : `${fmt.int(n3)} still watched at year ${st.L + 3}`);
     if (st.L !== 6) ledger.put("s2b", { what: "Odds of COD within the next 3 years: brand-new request vs six-year survivor", price: `${N.lm0cod} → ${N.lm6cod}`, note: `${N.lm6wait} of six-year survivors are still waiting 3 years later (${N.lm6n} requests in line at 6 years).` });
   }
   drawB();
 
   root.append(
     clicks(null, h("ul", {},
-      h("li", { html: `<b>The wait is getting longer.</b> In CAISO, MISO, PJM and SPP, projects built 2015–2019 took a median ${N.b1519p50} (P90 ${N.b1519p90}). Those built 2021–2025 took ${N.b2125p50} (P90 ${N.b2125p90}).` }),
+      h("li", { html: `<b>The wait is getting longer.</b> Among 2010-and-later entrants in CAISO, MISO, PJM and SPP, projects built 2015–2019 took a median ${N.b1519p50} (P90 ${N.b1519p90}). Those built 2021–2025 took ${N.b2125p50} (P90 ${N.b2125p90}).` }),
       h("li", { html: "<b>Plan on the P90.</b> The median is the coin flip. A campus that must be energized on a date needs the wait it beats 9 times in 10, and step 3 prices the gap." }),
       h("li", { html: `<b>Survivors get better odds, but not a fast lane.</b> Three-year odds of COD rise from ${N.lm0cod} for a new request to ${N.lm6cod} at six years, yet most survivors are still waiting three years on. Ask how long a project has been in line, and what phase it's in, before you count on it.` }))),
     say("Quote the P90, not the median. And when someone says their project is far along, ask how long it's been waiting. Survivors are better bets, but they're still slow."),

@@ -76,9 +76,9 @@ def main():
     n_cell, n_undated_cell = int(in_cell.sum()), int((in_cell & undated).sum())
 
     out_ev = [None if (pd.isna(e) or b) else days(e) for e, b in zip(ev, bad_order)]
-    # Events after the censor date: still in the queue as far as these data can say.
-    st = df.st.where(~(after & timing), 0).tolist()
-    out_ev = [None if (a and t) else e for e, a, t in zip(out_ev, after, timing)]
+    # Events after the censor date: at the end of 2025 these requests were still in the queue.
+    st = df.st.where(~after, 0).tolist()
+    out_ev = [None if a else e for e, a in zip(out_ev, after)]
 
     # LBNL's own convention for "request→COD for projects online in year Y": any row with an online date,
     # whatever its status. Recorded so the page can show both conventions side by side.
@@ -104,7 +104,7 @@ def main():
             (f"Timing cells: {', '.join(TIMING_REGIONS)}, entered {TIMING_YEARS[0]}–{TIMING_YEARS[1]}", n_cell),
             ("…of which operational/withdrawn with no event date (dropped from timing)", n_undated_cell),
             ("Event dated before request (excluded from timing, all regions)", n_bad),
-            ("Event dated after 2025-12-31 (all regions; in the timing sample these count as still in the queue)", n_after),
+            ("Event dated after 2025-12-31 (counted as still in the queue at end-2025)", n_after),
             ("Timing sample", int(timing.sum())),
             (f"LBNL-style 2025 median request→COD = {lbnl['medianMonths2025']} months over rows with a 2025 online date (any status)", lbnl["n"])]
     with open(os.path.join(HERE, "SNAPSHOT.md"), "w") as f:

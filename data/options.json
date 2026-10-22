@@ -37,14 +37,14 @@
         ],
         "years": [
           2010,
-          2025
+          2020
         ],
         "mw": [
           100,
           1000000000.0
         ]
       },
-      "anchor": "Measured: request→COD waits of PJM gas plants of 100 MW or more that entered from 2010 and reached COD, and their odds from step 1. A heavy-frame turbine ordered now delivers in 2031 (GE Vernova, Q2 2026).",
+      "anchor": "Measured: request→COD waits of PJM gas plants of 100 MW or more that entered 2010–2020 and reached COD, and their odds from step 1. A heavy-frame turbine ordered now delivers in 2031 (GE Vernova, Q2 2026).",
       "src": [
         [
           "LBNL Queued Up 2026 data file",
@@ -54,7 +54,8 @@
           "Utility Dive: GE Vernova gas turbine backlog climbs to 116 GW (July 23, 2026)",
           "https://www.utilitydive.com/news/ge-vernova-gas-turbine-backlog-climbs-to-116-gw/826039/"
         ]
-      ]
+      ],
+      "prose": "a new build in the PJM queue"
     },
     {
       "id": "eit",
@@ -79,7 +80,8 @@
           "Utility Dive: GE Vernova gas turbine backlog (July 23, 2026)",
           "https://www.utilitydive.com/news/ge-vernova-gas-turbine-backlog-climbs-to-116-gw/826039/"
         ]
-      ]
+      ],
+      "prose": "the expedited track"
     },
     {
       "id": "uprate",
@@ -94,13 +96,14 @@
       "p": 0.9,
       "pTag": "T",
       "maxMW": 100,
-      "anchor": "890 MW across 11 reactors for $4.3B; first unit 2028, all by end-2032; NRC review 6–12 months (POWER, Oct 2026). The low and high ends are those dates; the most likely value is a teaching value. Reuses a grid connection the plant already holds.",
+      "anchor": "Squeezing more megawatts out of a plant that already has a grid connection. Google–Constellation: 890 MW across 11 reactors for $4.3B; first unit 2028, all by end-2032; NRC review 6–12 months (POWER, Oct 2026). The low and high ends are those dates; the most likely value is a teaching value.",
       "src": [
         [
           "POWER: Google deal backs 890 MW of Constellation nuclear uprates at 11 PJM reactors (Oct 2026)",
           "https://www.powermag.com/google-deal-backs-890-mw-of-constellation-nuclear-uprates-at-11-pjm-reactors/"
         ]
-      ]
+      ],
+      "prose": "the uprate"
     },
     {
       "id": "restart",
@@ -121,7 +124,8 @@
           "World Nuclear News: Constellation seeks regulator's help for 2027 plant restart (Apr 1, 2026)",
           "https://world-nuclear-news.org/articles/constellation-seeks-regulators-help-for-2027-plant-restart"
         ]
-      ]
+      ],
+      "prose": "the restart"
     },
     {
       "id": "btm",
@@ -136,13 +140,14 @@
       "p": 0.85,
       "pTag": "T",
       "maxMW": 250,
-      "anchor": "Skips the generator queue. Aeroderivative turbines cost about $1,800 per kW, vs about $950 for HA-class combined-cycle turbines (BNP Paribas estimates via Utility Dive, July 2026). Brings fuel, permitting and air-permit risk.",
+      "anchor": "On-site generation that never waits in the generator queue. Aeroderivative turbines cost about $1,800 per kW, vs about $950 for HA-class combined-cycle turbines (BNP Paribas estimates via Utility Dive, July 2026). Brings fuel, permitting and air-permit risk.",
       "src": [
         [
           "Utility Dive: GE Vernova gas turbine backlog, with BNP Paribas price estimates (July 23, 2026)",
           "https://www.utilitydive.com/news/ge-vernova-gas-turbine-backlog-climbs-to-116-gw/826039/"
         ]
-      ]
+      ],
+      "prose": "behind-the-meter gas"
     },
     {
       "id": "flex",
@@ -169,7 +174,8 @@
           "Utility Dive: US grid could add 76–126 GW of flexible load (Feb 11, 2025)",
           "https://www.utilitydive.com/news/us-grid-headroom-flexible-load-data-center-ai-ev-duke-report/739767/"
         ]
-      ]
+      ],
+      "prose": "flexible load"
     }
   ],
   "sourced": [

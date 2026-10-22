@@ -27,7 +27,7 @@ export async function render(root, lab) {
   const Tsl = slider({ label: "Power arrives after (years from filing)", min: 0, max: 10, step: 0.1, value: st.T, fmt: v => fmt.yr(v), id: "s3T", oninput: v => { st.T = v; draw(); } });
   root.append(h("div", { class: "card" },
     h("div", { class: "card-h" }, h("h3", {}, "The cost of waiting, for a 250 MW campus"), tag("M"), tag("T"),
-      h("span", { class: "sub", html: `The dots are the ${N.qN} PJM gas plants of 100 MW or more that entered from 2010 and got built (measured). The curve is the cost model (teaching values).` })),
+      h("span", { class: "sub", html: `The dots are the ${N.qN} PJM gas plants of 100 MW or more that entered 2010–2020 and got built (measured). The curve is the cost model (teaching values).` })),
     h("div", { class: "grid2" }, chartBox,
       h("div", { class: "ctrl" },
         h("h4", {}, "Your scenario"),
@@ -76,13 +76,13 @@ export async function render(root, lab) {
     clicks(null, h("ul", {},
       h("li", { html: `<b>The null case is $0, and it should be.</b> Press it: power on the ready date costs nothing. Every dollar on this chart comes from the gap between ready and powered.` }),
       h("li", { html: `<b>The wait is measured; the price is a lever.</b> ${N.qLate} of the built PJM gas plants (100 MW or more) took longer than ${camp.readyYears} years from request to COD. Their median was ${N.qWaitP50} and their P90 ${N.qWaitP90}. Halve the value per MW-year and the cost halves. The wait doesn't move.` }),
-      h("li", { html: `<b>Idle GPUs change the scale.</b> Turn on “GPUs already bought.” Depreciation (${N.depPerMWyr} per MW-year) is larger than the margin, so buying chips before the power is secured is the expensive mistake.` }),
-      h("li", { html: `<b>And these are the plants that got built.</b> Only ${N.qOdds} of PJM gas requests of 100 MW or more reach COD within 10 years (step 1). The cost of the ones that never arrive is step 4's “fallback.”` }))),
+      h("li", { html: `<b>Idle GPUs change the scale.</b> Turn on “GPUs already bought.” Depreciation (${N.depPerMWyr} per MW-year) is larger than the ${N.valueMWyr} a megawatt-year is worth, so buying chips before the power is secured is the expensive mistake.` }),
+      h("li", { html: `<b>And these are the plants that got built.</b> Only ${N.qOdds} of PJM gas requests of 100 MW or more (entered 2010–2020) reached COD within ${N.qHorizon}, as far as they've been watched (step 1). The cost of the ones that never arrive is step 4's “fallback.”` }))),
     say(`A year of waiting on a 250 MW campus costs about ${N.oneYearLate} at Compute Deal Desk's price of a megawatt-year, and more than double if the GPUs are already sitting there. Budget the P90 wait, not the median.`),
     modelCard({
       what: "What is a delay worth, in today's dollars, for a campus ready at T<sub>0</sub> that gets power at T?",
       formula: "cost = MW · V · (e<sup>−r·T<sub>0</sub></sup> − e<sup>−r·T</sup>) / r for T > T<sub>0</sub>, else 0 (V in $M per MW-year, continuous discounting). With r = 0 it's MW · V · (T − T<sub>0</sub>). Idle GPUs add capex per MW ÷ life to V. Expected and P90 costs are taken over the measured waits.",
-      tags: `<span class="tag tag-M">measured</span> the waits (${N.qN} built PJM gas plants of 100 MW or more, entered 2010–2025). <span class="tag tag-S">sourced</span> 250 MW, $25M per MW and 5-year GPU life (Hyperscale Ledger). <span class="tag tag-T">teaching value</span> ${N.valueMWyr} per MW-year (Compute Deal Desk), 10% discount, ready at ${camp.readyYears} years.`,
+      tags: `<span class="tag tag-M">measured</span> the waits (${N.qN} built PJM gas plants of 100 MW or more, entered 2010–2020). <span class="tag tag-S">sourced</span> 250 MW, $25M per MW and 5-year GPU life (Hyperscale Ledger). <span class="tag tag-T">teaching value</span> ${N.valueMWyr} per MW-year (Compute Deal Desk), 10% discount, ready at ${camp.readyYears} years.`,
       py: "econ.py",
     }));
 }

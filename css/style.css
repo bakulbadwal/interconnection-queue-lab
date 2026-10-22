@@ -372,3 +372,10 @@ table.t td.l { text-align: left; }
   .mast-sp { display: none; }
   .iconbtn { flex: none; }
 }
+/* On phones a 640-unit chart renders at about half size, so its text needs larger user units to stay legible. */
+@media (max-width: 520px) {
+  .chart text { font-size: 17px; }
+  .chart .val, .chart .big { font-size: 16px; }
+  .chart .lbl { font-size: 17px; }
+  .optrow .chart text { font-size: 20px; }
+}

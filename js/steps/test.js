@@ -4,23 +4,26 @@ import { durations, aalenJohansen, kaplanMeierCod, at, landmark, builtWaits, qua
 import { delayCost, valuePerMWyr, portfolio } from "../econ.js";
 import { views, fmt } from "../numbers.js";
 
+export const FIELD_SLICE = { regions: ["CAISO"], types: ["Battery"], years: [2010, 2020] };
+
 export async function render(root, lab) {
   const { D, O, cx } = lab;
   const camp = O.campus;
-  const miso = cx.sel({ regions: ["MISO"], types: ["Gas"], timing: true });
-  const misoDur = durations(miso, cx.C), misoAj = aalenJohansen(misoDur), misoKm = kaplanMeierCod(misoDur);
+  // Q2–Q3 use a slice watched for at least 10 years (tests/check.mjs asserts it), so the 10-year readout is real.
+  const fq = cx.sel({ ...FIELD_SLICE, timing: true });
+  const fqDur = durations(fq, cx.C), fqAj = aalenJohansen(fqDur), fqKm = kaplanMeierCod(fqDur);
   const taj = aalenJohansen(durations(cx.sel({ timing: true }), cx.C));
-  const w2125 = builtWaits(cx.sel({ regions: D.timingRegions }), [2021, 2025]);
+  const w2125 = builtWaits(cx.sel({ timing: true }), [2021, 2025]);
   const vw = views(O, cx.measured);
   const best = Object.values(vw).sort((a, b) => b.p * b.onByDeadline - a.p * a.onByDeadline)[0].id;
 
   const Q = [
     { step: "0", q: "Step 0: what share of the capacity that entered 2000–2020 had reached commercial operation by end-2025? (percent)", unit: "%", ans: 100 * shares(cx.sel({ years: [2000, 2020] }), "mw").share[1], tol: 1 },
-    { step: "1", q: "Step 1: set MISO, Gas, any size, entered 2010–2025. What's the chance of reaching COD within 10 years? (percent)", unit: "%", ans: 100 * at(misoAj, 10, 2), tol: 1 },
-    { step: "1", q: "Same slice: what does the Kaplan–Meier mistake (ignoring withdrawals) say at 10 years? (percent)", unit: "%", ans: 100 * at(misoKm, 10, 1), tol: 1 },
+    { step: "1", q: "Step 1: set CAISO, Battery, any size, entered 2010–2020. What's the chance of reaching COD within 10 years? (percent)", unit: "%", ans: 100 * at(fqAj, 10, 2), tol: 1 },
+    { step: "1", q: "Same slice: what does the Kaplan–Meier mistake (ignoring withdrawals) say at 10 years? (percent)", unit: "%", ans: 100 * at(fqKm, 10, 1), tol: 1 },
     { step: "2", q: "Step 2: for projects built 2021–2025 in CAISO, MISO, PJM and SPP, what's the P90 wait from request to COD? (years)", unit: "yr", ans: quantile(w2125, 0.9), tol: 0.1 },
     { step: "2", q: "Step 2: a request has already waited 4 years. What's its chance of reaching COD in the next 3 years? (percent)", unit: "%", ans: 100 * landmark(taj, 4, 3).cod, tol: 1 },
-    { step: "3", q: "Step 3: turn on “GPUs already bought,” defaults otherwise. What does one year late cost? ($M)", unit: "$M", ans: delayCost(camp.readyYears + 1, camp.readyYears, camp.mw, valuePerMWyr(camp, camp.valuePerMWyr, true), camp.discount), tol: 5 },
+    { step: "3", q: "Step 3: turn on “GPUs already bought,” defaults otherwise. What does one year late cost? (answer in millions of dollars)", unit: "$M", ans: delayCost(camp.readyYears + 1, camp.readyYears, camp.mw, valuePerMWyr(camp, camp.valuePerMWyr, true), camp.discount), tol: 5 },
     { step: "4", q: "Step 4: with the default odds, which path has the highest chance of power by end-2029?", choices: O.options.map(o => [o.id, o.short]), ans: best },
     { step: "★", q: "Capstone: 100 MW uprate, 100 MW behind-the-meter gas, 50 MW flexible load. What's the chance of at least 200 MW by end-2029? (percent)", unit: "%",
       ans: 100 * portfolio(vw, { uprate: 100, btm: 100, flex: 50 }, camp.needMW, camp.fallbackYears, camp, camp.valuePerMWyr, camp.discount).pNeed, tol: 1 },

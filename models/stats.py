@@ -163,3 +163,15 @@ def at_risk(dur, L):
     """How many requests were still in the queue (no event, not yet censored) at L years."""
     lim = L * YEAR
     return sum(1 for t, _ in dur if t > lim)
+
+
+MIN_AT_RISK = 10
+
+
+def follow_up(dur, t_max=12):
+    """Last time (years, on a 0.1 grid, <= t_max) at which at least MIN_AT_RISK requests are still being watched."""
+    t_stop = 0.0
+    for i in range(int(round(t_max * 10)) + 1):
+        if at_risk(dur, i / 10) >= MIN_AT_RISK:
+            t_stop = i / 10
+    return t_stop

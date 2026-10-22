@@ -21,7 +21,7 @@ export async function render(root, lab) {
   const sliders = {};
 
   root.append(
-    h("p", { class: "lede", html: `The brief: <b>${N.campusMW} for an AI campus in PJM, with at least ${N.needMW} flowing by the end of 2029.</b> Split the megawatts across the paths from step 4. The desk scores your plan on the chance it meets the brief and on its expected delay cost (step 3's model), counting failed paths as arriving at a ${camp.fallbackYears}-year fallback ${tag("T").outerHTML}. Then write the memo.` }));
+    h("p", { class: "lede", html: `The brief: <b>${N.campusMW} for an AI campus in PJM, with at least ${N.needMW} flowing by the end of 2029.</b> Split the megawatts across the paths from step 4. The desk scores your plan on the chance it meets the brief and on its expected delay cost (step 3's model), counting the megawatts from a failed path as arriving at a fallback in year ${camp.fallbackYears} ${tag("T").outerHTML}. Then write the memo.` }));
 
   const total = h("div", { class: "note" });
   const distBox = h("div", { class: "chartbox" });
@@ -69,15 +69,19 @@ export async function render(root, lab) {
   function draft() {
     const res = score();
     const parts = Object.entries(alloc).filter(([, v]) => v).sort((a, b) => b[1] - a[1]);
-    const nm = k => O.options.find(o => o.id === k).short.toLowerCase();
+    const nm = k => O.options.find(o => o.id === k).prose;
+    const allQueue = parts.length === 1 && parts[0][0] === "queue";
     const lead = parts[0]?.[0];
     memo.value = [
       `Recommendation: power the ${camp.mw} MW campus with ${parts.map(([k, v]) => `${v} MW from ${nm(k)}`).join(", ") || "nothing yet"}.`,
-      `This plan has a ${fmt.pct(res.pNeed)} chance of at least ${camp.needMW} MW by the end of 2029, against ${N.allQueuePNeed} if we rely on a new build in the PJM queue.`,
-      `The queue is the slow road: only ${N.qOdds} of PJM gas requests of 100 MW or more reach commercial operation within 10 years, and those that do took a median ${N.qWaitP50} (P90 ${N.qWaitP90}).`,
-      `Expected delay cost is ${fmt.money(res.cost)} versus ${N.allQueueCost} all-in-queue, at Compute Deal Desk's price of a megawatt-year (a teaching value, so read it as a ratio, not a quote).`,
+      allQueue ? `This plan has a ${fmt.pct(res.pNeed)} chance of at least ${camp.needMW} MW by the end of 2029.`
+        : `This plan has a ${fmt.pct(res.pNeed)} chance of at least ${camp.needMW} MW by the end of 2029, against ${N.allQueuePNeed} if we rely on a new build in the PJM queue.`,
+      `The queue is the slow road: only ${N.qOdds} of PJM gas requests of 100 MW or more (entered 2010–2020) reached commercial operation within ${N.qHorizon}, as far as they've been watched, and those that do took a median ${N.qWaitP50} (P90 ${N.qWaitP90}).`,
+      `Expected delay cost is ${fmt.money(res.cost)}${allQueue ? "" : ` versus ${N.allQueueCost} all-in-queue`}, at Compute Deal Desk's price of a megawatt-year (a teaching value, so read it as a scale, not a quote).`,
       lead ? `The main risk sits in ${nm(lead)}: ${RISK[lead]}.` : "The main risk: we haven't secured any path yet.",
-      `Next step: lock terms on ${lead ? nm(lead) : "the fastest path"} this quarter, and keep a queue request on file as a cheap, long-dated option.`,
+      lead === "queue"
+        ? "Next step: file the request now, and start a faster path in parallel, because the queue alone almost never meets the date."
+        : `Next step: lock terms on ${lead ? nm(lead) : "the fastest path"} this quarter, and keep a queue request on file as a cheap, long-dated option.`,
     ].join(" ");
   }
   root.append(h("div", { class: "card" },
@@ -90,8 +94,9 @@ export async function render(root, lab) {
 
   root.append(
     clicks(null, h("ul", {},
-      h("li", { html: `<b>All in the queue almost never meets the brief</b> (${N.allQueuePNeed}). The measured odds and waits from steps 1–2 do that on their own; no teaching value is needed to reach that verdict.` }),
-      h("li", { html: `<b>The reference mix</b> (100 MW uprate, 100 MW behind-the-meter gas, 50 MW flexible load) lifts the chance to ${N.mixedPNeed} and cuts expected delay cost to ${N.mixedCost}. Most of its remaining risk is the uprate's timeline straddling the deadline. Can you beat it?` }),
+      h("li", { html: `<b>All in the queue almost never meets the brief</b> (${N.allQueuePNeed}). That verdict rests on the measured odds and waits alone.` }),
+      h("li", { html: `<b>The reference mix</b> (100 MW uprate, 100 MW behind-the-meter gas, 50 MW flexible load) lifts the chance to ${N.mixedPNeed} and cuts expected delay cost to ${N.mixedCost}. Most of its remaining risk is the uprate's timeline straddling the deadline.` }),
+      h("li", { html: `<b>Under the default odds, all behind-the-meter gas wins</b> (${N.allBtmPNeed}). That's the teaching values talking. What would stop you? Fuel supply, an air permit for 250 MW of on-site turbines, roughly twice the per-kW turbine cost, and a campus that never joins the grid. At even odds instead of the default, all behind-the-meter gas lands on time only ${N.allBtmEven} of the time.` }),
       h("li", { html: "<b>Spreading thin isn't hedging.</b> With a 200 MW floor on 250 MW, every block has to land. More paths means more ways to miss." }))),
     say("Don't bet the campus on the queue. Buy time with paths that reuse or skip a grid connection, keep a queue request as a cheap option, and quote the odds of power by the deadline, not a date."),
     modelCard({

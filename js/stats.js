@@ -133,3 +133,13 @@ export function atRisk(dur, L) {
   for (const [t] of dur) if (t > lim) n++;
   return n;
 }
+
+/** Curves stop once fewer than this many requests are still being watched: past that, one project moves the curve. */
+export const MIN_AT_RISK = 10;
+
+/** Last time (years, on a 0.1 grid, ≤ tMax) at which at least MIN_AT_RISK requests are still being watched. */
+export function followUp(dur, tMax = 12) {
+  let tStop = 0;
+  for (let i = 0; i <= Math.round(tMax * 10); i++) if (atRisk(dur, i / 10) >= MIN_AT_RISK) tStop = i / 10;
+  return tStop;
+}
