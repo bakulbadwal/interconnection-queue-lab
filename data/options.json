@@ -1,0 +1,184 @@
+{
+  "_note": "Shared by js/econ.js and models/econ.py. Tags: S = sourced (link in DATA.md and on the page), M = measured from the queue data at run time, T = teaching value (a round, labelled assumption). Option times are years from the decision date (Oct 2026), as a triangular range [low, most likely, high].",
+  "campus": {
+    "mw": 250,
+    "mwTag": "S",
+    "capexPerMW": 25.0,
+    "capexTag": "S",
+    "lifeYears": 5,
+    "lifeTag": "S",
+    "valuePerMWyr": 3.48,
+    "valueTag": "T",
+    "discount": 0.1,
+    "discountTag": "T",
+    "readyYears": 3.0,
+    "readyTag": "T",
+    "deadlineYears": 3.2,
+    "needMW": 200,
+    "needTag": "T",
+    "fallbackYears": 8,
+    "fallbackTag": "T"
+  },
+  "options": [
+    {
+      "id": "queue",
+      "short": "Queue a new build",
+      "name": "Queue a new gas plant in PJM",
+      "time": "measured",
+      "p": "measured",
+      "pHorizon": 10,
+      "maxMW": 250,
+      "slice": {
+        "regions": [
+          "PJM"
+        ],
+        "types": [
+          "Gas"
+        ],
+        "years": [
+          2010,
+          2025
+        ],
+        "mw": [
+          100,
+          1000000000.0
+        ]
+      },
+      "anchor": "Measured: request→COD waits of PJM gas plants of 100 MW or more that entered from 2010 and reached COD, and their odds from step 1. A heavy-frame turbine ordered now delivers in 2031 (GE Vernova, Q2 2026).",
+      "src": [
+        [
+          "LBNL Queued Up 2026 data file",
+          "https://emp.lbl.gov/queues"
+        ],
+        [
+          "Utility Dive: GE Vernova gas turbine backlog climbs to 116 GW (July 23, 2026)",
+          "https://www.utilitydive.com/news/ge-vernova-gas-turbine-backlog-climbs-to-116-gw/826039/"
+        ]
+      ]
+    },
+    {
+      "id": "eit",
+      "short": "Expedited track",
+      "name": "PJM Expedited Interconnection Track",
+      "time": [
+        2.5,
+        3.5,
+        5.5
+      ],
+      "timeTag": "T",
+      "p": 0.5,
+      "pTag": "T",
+      "maxMW": 250,
+      "anchor": "At least 250 MW that can come online within 3 years; at most 10 requests a year; an interconnection agreement in about 10 months; expires end-2027 (FERC order, June 9 2026). New heavy-frame turbines ordered today deliver in 2031, so the 3-year promise needs a turbine you already hold.",
+      "src": [
+        [
+          "Utility Dive: FERC approves PJM fast track (June 10, 2026)",
+          "https://www.utilitydive.com/news/ferc-pjm-fast-track-expedited-interconnection-eit/822479/"
+        ],
+        [
+          "Utility Dive: GE Vernova gas turbine backlog (July 23, 2026)",
+          "https://www.utilitydive.com/news/ge-vernova-gas-turbine-backlog-climbs-to-116-gw/826039/"
+        ]
+      ]
+    },
+    {
+      "id": "uprate",
+      "short": "Uprate",
+      "name": "Uprate an existing plant (Google–Constellation)",
+      "time": [
+        1.2,
+        3.5,
+        6.2
+      ],
+      "timeTag": "S/T",
+      "p": 0.9,
+      "pTag": "T",
+      "maxMW": 100,
+      "anchor": "890 MW across 11 reactors for $4.3B; first unit 2028, all by end-2032; NRC review 6–12 months (POWER, Oct 2026). The low and high ends are those dates; the most likely value is a teaching value. Reuses a grid connection the plant already holds.",
+      "src": [
+        [
+          "POWER: Google deal backs 890 MW of Constellation nuclear uprates at 11 PJM reactors (Oct 2026)",
+          "https://www.powermag.com/google-deal-backs-890-mw-of-constellation-nuclear-uprates-at-11-pjm-reactors/"
+        ]
+      ]
+    },
+    {
+      "id": "restart",
+      "short": "Restart",
+      "name": "Restart a retired plant (Crane)",
+      "time": [
+        3.0,
+        3.5,
+        7.0
+      ],
+      "timeTag": "S/T",
+      "p": 0.7,
+      "pTag": "T",
+      "maxMW": 250,
+      "anchor": "Crane (Three Mile Island Unit 1), 835 MW: target pulled from 2028 to 2027, but PJM said some upgrades take until 2031, so Constellation asked FERC to move Eddystone's injection rights to Crane (World Nuclear News, Apr 2026). Very few retired plants can be restarted.",
+      "src": [
+        [
+          "World Nuclear News: Constellation seeks regulator's help for 2027 plant restart (Apr 1, 2026)",
+          "https://world-nuclear-news.org/articles/constellation-seeks-regulators-help-for-2027-plant-restart"
+        ]
+      ]
+    },
+    {
+      "id": "btm",
+      "short": "Behind-the-meter gas",
+      "name": "Behind-the-meter gas (aeroderivative or engines)",
+      "time": [
+        1.0,
+        2.0,
+        3.5
+      ],
+      "timeTag": "T",
+      "p": 0.85,
+      "pTag": "T",
+      "maxMW": 250,
+      "anchor": "Skips the generator queue. Aeroderivative turbines cost about $1,800 per kW, vs about $950 for HA-class combined-cycle turbines (BNP Paribas estimates via Utility Dive, July 2026). Brings fuel, permitting and air-permit risk.",
+      "src": [
+        [
+          "Utility Dive: GE Vernova gas turbine backlog, with BNP Paribas price estimates (July 23, 2026)",
+          "https://www.utilitydive.com/news/ge-vernova-gas-turbine-backlog-climbs-to-116-gw/826039/"
+        ]
+      ]
+    },
+    {
+      "id": "flex",
+      "short": "Flexible load",
+      "name": "Flexible load (agree to be curtailed)",
+      "time": [
+        1.0,
+        2.0,
+        3.0
+      ],
+      "timeTag": "T",
+      "p": 0.6,
+      "pTag": "T",
+      "maxMW": 150,
+      "curtailHours": 85,
+      "curtailTag": "S",
+      "anchor": "Duke Nicholas Institute (Feb 2025): the 22 largest balancing areas could absorb 76 GW of new load curtailed 0.25% of the time (about 85 hours a year), 126 GW at 1%. A first-order estimate with no transmission modelled.",
+      "src": [
+        [
+          "Duke Nicholas Institute: Rethinking Load Growth (Feb 2025)",
+          "https://nicholasinstitute.duke.edu/publications/rethinking-load-growth"
+        ],
+        [
+          "Utility Dive: US grid could add 76–126 GW of flexible load (Feb 11, 2025)",
+          "https://www.utilitydive.com/news/us-grid-headroom-flexible-load-data-center-ai-ev-duke-report/739767/"
+        ]
+      ]
+    }
+  ],
+  "sourced": [
+    "$4.3B",
+    "$1,800",
+    "$950",
+    "0.25%",
+    "1%",
+    "$25M",
+    "$3.48M"
+  ]
+}

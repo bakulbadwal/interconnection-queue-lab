@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Interconnection Queue Lab</title>
+<meta name="description" content="What the grid interconnection queue means for an AI campus: the odds a project ever connects, how long the wait really is, what a year of delay costs, and the ways around it. Built on LBNL's Queued Up data (37,527 requests).">
+<meta property="og:title" content="Interconnection Queue Lab">
+<meta property="og:description" content="Odds, waits and the cost of delay in the US grid interconnection queue, from 37,527 real requests. A hands-on lab for AI power strategy.">
+<meta property="og:image" content="https://bakulbadwal.github.io/interconnection-queue-lab/docs/hero.png">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect x='1' y='1' width='30' height='30' rx='7' fill='%2322385C'/%3E%3Ccircle cx='7' cy='16' r='2.4' fill='%23D6AE5E' opacity='.45'/%3E%3Ccircle cx='13' cy='16' r='2.4' fill='%23D6AE5E' opacity='.7'/%3E%3Ccircle cx='19' cy='16' r='2.4' fill='%23D6AE5E'/%3E%3Cpath d='M25 8v16' stroke='%236CC296' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<script>
+  // Keep the router in charge of scroll position (a hash like #/s3 never matches an element id).
+  history.scrollRestoration = "manual";
+  if (/^#s\d$/.test(location.hash)) history.replaceState(null, "", "#/" + location.hash.slice(1));
+  try { const t = new URLSearchParams(location.search).get("theme") || localStorage.getItem("iql.theme"); if (t) document.documentElement.dataset.theme = t; } catch {}
+</script>
+</head>
+<body>
+<header class="mast">
+  <div class="mast-in">
+    <a class="brand" href="#/">
+      <svg class="brand-mark" viewBox="0 0 32 32" aria-hidden="true"><rect x="1" y="1" width="30" height="30" rx="7" fill="#22385C"/><circle cx="7" cy="16" r="2.4" fill="#D6AE5E" opacity=".45"/><circle cx="13" cy="16" r="2.4" fill="#D6AE5E" opacity=".7"/><circle cx="19" cy="16" r="2.4" fill="#D6AE5E"/><path d="M25 8v16" stroke="#6CC296" stroke-width="3" stroke-linecap="round"/></svg>
+      <span><b>Interconnection Queue Lab</b><small>What does the wait for grid power mean?</small></span>
+    </a>
+    <span class="mast-sp"></span>
+    <button class="iconbtn" id="ledgerBtn" type="button" aria-controls="ledger" aria-expanded="false">Takeaways <span class="pill" id="ledgerCount">0</span></button>
+    <button class="iconbtn" id="themeBtn" type="button" aria-label="Toggle dark mode">◐</button>
+  </div>
+</header>
+<nav class="tabs" aria-label="Steps"><div class="tabs-in" id="tabs"></div></nav>
+<div class="wrap" id="wrap">
+  <main id="main" tabindex="-1"><div class="loading">Loading 37,527 interconnection requests…</div></main>
+  <aside class="ledger" id="ledger" aria-label="Takeaways"></aside>
+</div>
+<footer class="foot-strip"><div class="in">
+  <span>Built by <a href="https://github.com/bakulbadwal">Bakul Badwal</a> (UVA Darden MBA ’27). Queue data: Lawrence Berkeley National Laboratory &amp; GridTracker, <a href="https://emp.lbl.gov/queues"><i>Queued Up</i> 2026 Edition</a> (data through 2025), <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>.</span>
+  <span><a href="https://github.com/bakulbadwal/interconnection-queue-lab">Source, data notes &amp; Python twins</a> · Values tagged “teaching value” are labelled assumptions.</span>
+</div></footer>
+<script type="module" src="js/app.js"></script>
+</body>
+</html>

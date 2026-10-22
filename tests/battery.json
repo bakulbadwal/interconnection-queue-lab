@@ -1,0 +1,46 @@
+{
+  "_note": "Cases computed by both js (tests/check.mjs) and Python (models/run_checks.py); every key must agree to 1e-9. Region and type names resolve against data/queue.json.",
+  "times": [1, 2, 3, 5, 7, 10],
+  "slices": [
+    { "name": "all-2000-2020", "years": [2000, 2020] },
+    { "name": "timing-all", "timing": true },
+    { "name": "pjm", "regions": ["PJM"], "timing": true },
+    { "name": "pjm-solar", "regions": ["PJM"], "types": ["Solar"], "timing": true },
+    { "name": "pjm-gas", "regions": ["PJM"], "types": ["Gas"], "timing": true },
+    { "name": "pjm-gas-big", "regions": ["PJM"], "types": ["Gas"], "mw": [100, 1e9], "timing": true },
+    { "name": "pjm-battery", "regions": ["PJM"], "types": ["Battery"], "timing": true },
+    { "name": "miso", "regions": ["MISO"], "timing": true },
+    { "name": "caiso", "regions": ["CAISO"], "timing": true },
+    { "name": "spp", "regions": ["SPP"], "timing": true },
+    { "name": "timing-gas", "types": ["Gas"], "timing": true },
+    { "name": "timing-solar", "types": ["Solar"], "timing": true },
+    { "name": "timing-big", "mw": [500, 1e9], "timing": true },
+    { "name": "timing-small", "mw": [0, 20], "timing": true },
+    { "name": "pjm-2018", "regions": ["PJM"], "years": [2018, 2018], "timing": true },
+    { "name": "pjm-2021", "regions": ["PJM"], "years": [2021, 2021], "timing": true },
+    { "name": "ercot-2000-2020", "regions": ["ERCOT"], "years": [2000, 2020] },
+    { "name": "west-2000-2020", "regions": ["West"], "years": [2000, 2020] }
+  ],
+  "landmark": { "slice": "timing-all", "L": [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "h": 3 },
+  "built": [
+    { "name": "timing-2015-2019", "regions": ["CAISO", "MISO", "PJM", "SPP"], "cod": [2015, 2019] },
+    { "name": "timing-2021-2025", "regions": ["CAISO", "MISO", "PJM", "SPP"], "cod": [2021, 2025] },
+    { "name": "timing-2025", "regions": ["CAISO", "MISO", "PJM", "SPP"], "cod": [2025, 2025] },
+    { "name": "all-2025", "cod": [2025, 2025] },
+    { "name": "pjm-gas-all", "regions": ["PJM"], "types": ["Gas"], "years": [2010, 2025], "cod": [2010, 2025] },
+    { "name": "pjm-gas-big", "regions": ["PJM"], "types": ["Gas"], "years": [2010, 2025], "mw": [100, 1e9], "cod": [2010, 2025] }
+  ],
+  "delay": [
+    { "T": 3.0, "T0": 3.0, "mw": 250, "V": 3.48, "r": 0.10 },
+    { "T": 2.0, "T0": 3.0, "mw": 250, "V": 3.48, "r": 0.10 },
+    { "T": 4.0, "T0": 3.0, "mw": 250, "V": 3.48, "r": 0.10 },
+    { "T": 8.0, "T0": 3.0, "mw": 250, "V": 3.48, "r": 0.10 },
+    { "T": 4.0, "T0": 3.0, "mw": 250, "V": 3.48, "r": 0.0 },
+    { "T": 4.0, "T0": 3.0, "mw": 250, "V": 8.48, "r": 0.10 }
+  ],
+  "portfolios": [
+    { "name": "all-queue", "alloc": { "queue": 250 } },
+    { "name": "mixed", "alloc": { "uprate": 100, "btm": 100, "flex": 50 } },
+    { "name": "spread", "alloc": { "queue": 50, "eit": 50, "uprate": 50, "btm": 50, "flex": 50 } }
+  ]
+}
